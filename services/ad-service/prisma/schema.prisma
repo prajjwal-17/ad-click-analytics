@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Advertiser {
+  id        BigInt     @id @default(autoincrement())
+  name      String
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  campaigns Campaign[]
+
+  @@map("advertisers")
+}
+
+model Campaign {
+  id           BigInt     @id @default(autoincrement())
+  advertiserId BigInt     @map("advertiser_id")
+  name         String
+  status       String     @default("ACTIVE")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  ads          Ad[]
+  advertiser   Advertiser @relation(fields: [advertiserId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("campaigns")
+}
+
+model Ad {
+  id          BigInt   @id @default(autoincrement())
+  campaignId  BigInt   @map("campaign_id")
+  title       String
+  imageUrl    String?  @map("image_url")
+  redirectUrl String   @map("redirect_url")
+  placement   String
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("ads")
+}
